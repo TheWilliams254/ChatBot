@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import axios from 'axios';
 
 function App() {
   const [input, setInput] = useState('');
@@ -17,6 +18,45 @@ function App() {
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
 
+  const getBotReply = async (userInput) => {
+    try {
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-3.5-turbo',
+         messages: [
+            { role: 'system', content: 'You are a helpful chatbot.' },
+            { role: 'user', content: userInput }
+          ]
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          }
+           }
+      );
+
+      const reply = response.data.choices[0].message.content.trim();
+      const botReply = {
+        text: `Bot: ${reply}`,
+        timestamp: new Date().toLocaleTimeString(),
+        sender: 'bot'
+      };
+      setMessages(prev => [...prev, botReply]);
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          text: 'Bot: Sorry, I had trouble thinking that through.',
+          timestamp: new Date().toLocaleTimeString(),
+          sender: 'bot'
+        }
+      ]);
+    }
+  };
+
   const handleSend = () => {
     if (!input || typeof input !== 'string' || !input.trim()) return;
 
@@ -25,17 +65,10 @@ function App() {
       timestamp: new Date().toLocaleTimeString(),
       sender: 'user'
     };
-    setMessages(prev => [...prev, newMessage]);
-    setInput('');
 
-    setTimeout(() => {
-      const botReply = {
-        text: 'Bot: Got your message!',
-        timestamp: new Date().toLocaleTimeString(),
-        sender: 'bot'
-      };
-      setMessages(prev => [...prev, botReply]);
-    }, 1000);
+    setMessages(prev => [...prev, newMessage]);
+    getBotReply(input);
+    setInput('');
   };
 
   return (
