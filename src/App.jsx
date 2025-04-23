@@ -69,6 +69,12 @@ function App() {
     setMessages(prev => [...prev, newMessage]);
     getBotReply(input);
     setInput('');
+    setisSending(true);
+
+    getBotReply(input).then(() => {
+      setTimeout(() => 
+        setisSending(false), 1500);
+      });
   };
 
   return (
@@ -90,6 +96,14 @@ function App() {
           placeholder="Type your message..."
         />
         <button onClick={handleSend}>Send</button>
+      </div>
+      <div>
+      <button className="clear-button" onClick={() => {
+           localStorage.removeItem('chatMessages');
+            setMessages([]);
+    }   }>
+  Clear Chat
+</button>
       </div>
     </div>
   );
