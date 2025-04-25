@@ -1,5 +1,9 @@
 body {
+  background-image: url('/bg.jpg'); /* use full URL if external */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  font-family: 'Arial', sans-serif;
 }
