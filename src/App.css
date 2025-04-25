@@ -3,11 +3,32 @@
   max-width: 500px;
   margin: 40px auto;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
   display: flex;
   flex-direction: column;
   height: 80vh;
+  
 }
+
+.bot-header {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  background-color: rgba(148, 63, 181, 0.3); /* 0.8 = 80% opacity */
+
+  color: rgb(244, 250, 246);
+  text-align: center;
+  padding: 10px 0;
+  font-size: 18px;
+  font-weight: bold;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border: 1px solid #ccc;
+  
+  ;
+}
+
 
 .chat-history {
   flex: 1;
@@ -57,13 +78,28 @@
 }
 
 .chat-input button {
-  padding: 10px 20px;
+  width: 45px;
+  height: 45px;
+  background-color: #25D366; /* WhatsApp green */
   border: none;
-  background-color: #007bff;
-  color: white;
-  border-radius: 4px;
+  border-radius: 50%;
   cursor: pointer;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
 }
+
+.chat-input button:hover {
+  background-color: #20b45c; /* darker green on hover */
+}
+
+.chat-input button svg {
+  color: white;
+  font-size: 20px; /* Adjust icon size here */
+}
+
 .clear-button {
   margin: 10px;
   padding: 8px 12px;
@@ -77,3 +113,5 @@
 .clear-button:hover {
   background-color: #d32f2f;
 }
+
+

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
+import { IoMdSend } from 'react-icons/io'; 
 
 const api = "https://chatbot-backend-1-v0ya.onrender.com";
 
@@ -91,29 +92,37 @@ function App() {
   
 
   return (
-    <div className="chat-container">
-      <div className="chat-history">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.sender}`}>
-            <span>{msg.text}</span>
-            <small>{msg.timestamp}</small>
+    
+      <div className="app-wrapper">
+        <div className="bot-header">
+          🤖 DaWiShee
+        </div>
+        <div className="chat-container">
+          <div className="chat-history">
+            {messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.sender}`}>
+                <span>{msg.text}</span>
+                <small>{msg.timestamp}</small>
+              </div>
+            ))}
           </div>
-        ))}
+          <div className="chat-input">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Type your message..."
+            />
+            <button onClick={handleSend} disabled={isSending}>
+              <IoMdSend />
+            </button>
+          </div>
+          <button className="clear-button" onClick={() => setMessages([])}>Clear Chat</button>
+        </div>
       </div>
-      <div className="chat-input">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type your message..."
-        />
-        <button onClick={handleSend} disabled={isSending}>
-          {isSending ? 'Sending...' : 'Send'}
-        </button>
-      </div>
-      <button className= "clear-button" onClick={() => setMessages([])}>Clear Chat</button>
-    </div>
+    
+    
   );
 }
 
