@@ -112,6 +112,7 @@ function App() {
           {isSending ? 'Sending...' : 'Send'}
         </button>
       </div>
+      <button className= "clear-button" onClick={() => setMessages([])}>Clear Chat</button>
     </div>
   );
 }
