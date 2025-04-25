@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
 
@@ -13,52 +13,30 @@ function App() {
       return [];
     }
   });
+  const [isSending, setIsSending] = useState(false);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('chatMessages', JSON.stringify(messages));
   }, [messages]);
 
-  const getBotReply = async (userInput) => {
-    try {
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: 'gpt-3.5-turbo',
-         messages: [
-            { role: 'system', content: 'You are a helpful chatbot.' },
-            { role: 'user', content: userInput }
-          ]
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          }
-           }
-      );
-
-      const reply = response.data.choices[0].message.content.trim();
-      const botReply = {
-        text: `Bot: ${reply}`,
-        timestamp: new Date().toLocaleTimeString(),
-        sender: 'bot'
-      };
-      setMessages(prev => [...prev, botReply]);
-    } catch (error) {
-      console.error('OpenAI API Error:', error);
-      setMessages(prev => [
-        ...prev,
-        {
-          text: 'Bot: Sorry, I had trouble thinking that through.',
-          timestamp: new Date().toLocaleTimeString(),
-          sender: 'bot'
-        }
-      ]);
-    }
+  const debounceSend = (func, delay) => {
+    return (...args) => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        func(...args);
+      }, delay);
+    };
   };
 
+  const debouncedSend = debounceSend(() => {
+    getBotReply(input).finally(() => {
+      setTimeout(() => setIsSending(false), 1500);
+    });
+  }, 1000);
+
   const handleSend = () => {
-    if (!input || typeof input !== 'string' || !input.trim()) return;
+    if (!input.trim() || isSending) return;
 
     const newMessage = {
       text: input,
@@ -67,15 +45,48 @@ function App() {
     };
 
     setMessages(prev => [...prev, newMessage]);
-    getBotReply(input);
     setInput('');
-    setisSending(true);
-
-    getBotReply(input).then(() => {
-      setTimeout(() => 
-        setisSending(false), 1500);
-      });
+    setIsSending(true);
+    debouncedSend();
   };
+
+  const getBotReply = async (userInput) => {
+    try {
+      const response = await fetch("https://chatbot-backend-1-v0ya.onrender.com/chats", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userInput })
+      });
+  
+      const data = await response.json();
+      const reply = data.reply || "Sorry, I couldn't generate a reply.";
+  
+      const botReply = {
+        text: `Bot: ${reply}`,
+        timestamp: new Date().toLocaleTimeString(),
+        sender: 'bot'
+      };
+      setMessages(prev => [...prev, botReply]);
+  
+    } catch (error) {
+      console.error('OpenAI API Error:', error);
+      let fallbackText = 'Bot: Sorry, I had trouble thinking that through.';
+      if (error.response?.status === 429) {
+        fallbackText = 'Bot: You are sending messages too fast. Please wait a moment and try again.';
+      } else if (error.response?.status === 409) {
+        fallbackText = 'Bot: There was a conflict processing your message. Please try again.';
+      }
+      const fallbackReply = {
+        text: fallbackText,
+        timestamp: new Date().toLocaleTimeString(),
+        sender: 'bot'
+      };
+      setMessages(prev => [...prev, fallbackReply]);
+    }
+  };
+  
 
   return (
     <div className="chat-container">
@@ -90,20 +101,14 @@ function App() {
       <div className="chat-input">
         <input
           type="text"
-          value={typeof input === 'string' ? input : ''}
+          value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Type your message..."
         />
-        <button onClick={handleSend}>Send</button>
-      </div>
-      <div>
-      <button className="clear-button" onClick={() => {
-           localStorage.removeItem('chatMessages');
-            setMessages([]);
-    }   }>
-  Clear Chat
-</button>
+        <button onClick={handleSend} disabled={isSending}>
+          {isSending ? 'Sending...' : 'Send'}
+        </button>
       </div>
     </div>
   );
