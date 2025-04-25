@@ -52,7 +52,7 @@ function App() {
 
   const getBotReply = async (userInput) => {
     try {
-      const response = await fetch("http://localhost:3001/chat", {
+      const response = await fetch("https://chatbot-backend-1-v0ya.onrender.com/chats", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
