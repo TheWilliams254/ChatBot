@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import axios from 'axios';
 
+const api = "https://chatbot-backend-1-v0ya.onrender.com";
+
 function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(() => {
@@ -52,7 +54,7 @@ function App() {
 
   const getBotReply = async (userInput) => {
     try {
-      const response = await fetch("https://chatbot-backend-1-v0ya.onrender.com/chats", {
+      const response = await fetch(`${api}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
